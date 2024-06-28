@@ -2,10 +2,12 @@ package tests;
 
 import io.restassured.response.Response;
 import models.lombok.AddBookToBasketRequestBodyModel;
+import models.lombok.DeleteBooksFromBasketRequestBodyModel;
 import models.lombok.LoginRequestBodyModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Cookie;
+import tests.steps.BookStoreSteps;
 
 import java.util.List;
 
@@ -19,8 +21,8 @@ import static io.qameta.allure.Allure.step;
 public class BooksBasketTests extends TestBase {
 
     @Test
-    @DisplayName("Удаление товара из корзины")
-    void deleteBookFromBasketTest() {
+    @DisplayName("Удаление книги из корзины")
+    void deleteBookFromBasketWithStepsTest() {
         LoginRequestBodyModel authData = new LoginRequestBodyModel();
 
         Response authResponse = step("Авторизоваться через API", () ->
@@ -31,6 +33,17 @@ public class BooksBasketTests extends TestBase {
                 .then()
                 .spec(responseSpec)
                 .extract().response());
+
+        DeleteBooksFromBasketRequestBodyModel userBasket = new DeleteBooksFromBasketRequestBodyModel();
+        userBasket.setUserId(authResponse.path("userId"));
+
+        step("Очистить корзину через API", () ->
+                given(authorizedRequestSpec(authResponse.path("token")))
+                        .body(userBasket)
+                        .when()
+                        .delete("/BookStore/v1/Books")
+                        .then()
+                        .spec(responseSpec));
 
         AddBookToBasketRequestBodyModel bookData = new AddBookToBasketRequestBodyModel();
         bookData.setUserId(authResponse.path("userId"));
@@ -64,4 +77,21 @@ public class BooksBasketTests extends TestBase {
         $(".profile-wrapper").shouldHave(text("No rows found")));
 
     }
+
+    @Test
+    @DisplayName("Удаление книги из корзины через аннотацию Steps")
+    void deleteBookFromBasketWithStepsAnnotationTest() {
+        BookStoreSteps steps = new BookStoreSteps();
+        LoginRequestBodyModel authData = new LoginRequestBodyModel();
+        String isbnNum = "9781449325862";
+
+        Response authResponse = steps.apiAuthorization(authData);
+        steps.clearBasketWithApi(authResponse);
+        steps.addBookToBasket(authResponse, isbnNum);
+        steps.setAuthCookie(authResponse);
+        steps.deleteBookFromProfile();
+        steps.checkThatBasketIsEmpty();
+    }
+
+
 }
