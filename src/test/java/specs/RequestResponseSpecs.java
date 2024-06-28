@@ -10,6 +10,14 @@ import static io.restassured.filter.log.LogDetail.*;
 import static io.restassured.http.ContentType.JSON;
 
 public class RequestResponseSpecs {
+
+    public static RequestSpecification registerRequestSpec = with()
+            .filter(withCustomTemplates())
+            .log().uri()
+            .log().body()
+            .log().headers()
+            .contentType(JSON);
+
     public static RequestSpecification loginRequestSpec = with()
             .filter(withCustomTemplates())
             .log().uri()
