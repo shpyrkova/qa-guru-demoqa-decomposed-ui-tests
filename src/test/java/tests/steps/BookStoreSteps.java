@@ -23,32 +23,30 @@ public class BookStoreSteps {
     public RegistrationRequestBodyModel apiRegister() {
         RegistrationRequestBodyModel registerData = new RegistrationRequestBodyModel();
 
-        step("Зарегистрироваться через API", () ->
-                given(registerRequestSpec)
-                        .body(registerData)
-                        .when()
-                        .post("/Account/v1/User")
-                        .then()
-                        .spec(responseSpec)
-                        .extract().response());
+        given(registerRequestSpec)
+                .body(registerData)
+                .when()
+                .post("/Account/v1/User")
+                .then()
+                .spec(responseSpec)
+                .extract().response();
 
         return registerData;
     }
 
     @Step("Сгенерировать токен через API")
-    public Response apiGenerateToken(RegistrationRequestBodyModel registerData) {
+    public void apiGenerateToken(RegistrationRequestBodyModel registerData) {
         LoginRequestBodyModel authData = new LoginRequestBodyModel();
         authData.setUserName(registerData.getUserName());
         authData.setPassword(registerData.getPassword());
 
-        return step("Авторизоваться через API", () ->
-                given(loginRequestSpec)
-                        .body(authData)
-                        .when()
-                        .post("/Account/v1/GenerateToken")
-                        .then()
-                        .spec(responseSpec)
-                        .extract().response());
+        given(loginRequestSpec)
+                .body(authData)
+                .when()
+                .post("/Account/v1/GenerateToken")
+                .then()
+                .spec(responseSpec)
+                .extract().response();
     }
 
     @Step("Авторизоваться через API")
